@@ -93,18 +93,18 @@ class NfcManager extends ReactContextBaseJavaModule implements ActivityEventList
 	}
 
 	@ReactMethod
-	public void requestNdefWrite(ReadableArray rnArray, ReadableMap options, Callback callback) {
+	public void requestNdefWrite(ReadableArray rnArray, String mimeType, Callback callback) {
 		synchronized(this) {
 			if (!isForegroundEnabled) {
-				callback.invoke("you should requestTagEvent first");
+				callback.invoke("you should requestTagEvent first-neoxaiedit2");
 				return;
 			}
 
 		    if (writeNdefRequest != null) {
 		    	callback.invoke("You can only issue one request at a time");
 		    } else {
-				boolean format = options.getBoolean("format");
-				boolean formatReadOnly = options.getBoolean("formatReadOnly");
+				boolean format = false;//options.getBoolean("format");
+				boolean formatReadOnly=false;// = options.getBoolean("formatReadOnly");
 				
 		        try {
 					NdefMessage msgToWrite;
@@ -116,7 +116,8 @@ class NfcManager extends ReactContextBaseJavaModule implements ActivityEventList
 						msgToWrite = null;
 					} else {
 						byte[] bytes = rnArrayToBytes(rnArray);
-						msgToWrite = new NdefMessage(bytes);
+						NdefRecord recordToWrite=NdefRecord.createMime(mimeType,bytes);
+						msgToWrite = new NdefMessage(recordToWrite);
 					}
 
 		    		writeNdefRequest = new WriteNdefRequest(
@@ -125,7 +126,7 @@ class NfcManager extends ReactContextBaseJavaModule implements ActivityEventList
 						format,
 						formatReadOnly
 					); 
-		        } catch (FormatException e) {
+		        } catch (IllegalArgumentException e) {
 		        	callback.invoke("Incorrect ndef format");
 		        }
 		    }

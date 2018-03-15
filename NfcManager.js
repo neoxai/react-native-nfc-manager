@@ -24,13 +24,13 @@ class NfcManager {
     this._subscription = null;
   }
 
-  requestNdefWrite(bytes, {format=false, formatReadOnly=false}={}) {
+  requestNdefWrite(bytes, mimeType) {
     if (Platform.OS === 'ios') {
       return Promise.reject('not implemented');
     }
 
     return new Promise(resolve => {
-      NativeNfcManager.requestNdefWrite(bytes, {format, formatReadOnly}, resolve)
+      NativeNfcManager.requestNdefWrite(bytes, mimType, resolve)
     })
       .then((err, result) => {
         if (err) {
