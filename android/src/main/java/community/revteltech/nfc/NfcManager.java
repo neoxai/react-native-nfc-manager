@@ -93,7 +93,7 @@ class NfcManager extends ReactContextBaseJavaModule implements ActivityEventList
 	}
 
 	@ReactMethod
-	public void requestNdefWrite(ReadableArray rnArray,ReadableMap options, String mimeType, Callback callback) {
+	public void requestNdefWrite(ReadableArray rnArray,String mimeType, ReadableMap options, Callback callback) {
 		synchronized(this) {
 			if (!isForegroundEnabled) {
 				callback.invoke("you should requestTagEvent first-neoxaiedit2");
