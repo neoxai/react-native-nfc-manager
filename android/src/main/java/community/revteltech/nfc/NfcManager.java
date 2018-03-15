@@ -93,7 +93,7 @@ class NfcManager extends ReactContextBaseJavaModule implements ActivityEventList
 	}
 
 	@ReactMethod
-	public void requestNdefWrite(ReadableArray rnArray, String mimeType, Callback callback) {
+	public void requestNdefWrite(ReadableArray rnArray,ReadableMap options, String mimeType, Callback callback) {
 		synchronized(this) {
 			if (!isForegroundEnabled) {
 				callback.invoke("you should requestTagEvent first-neoxaiedit2");
@@ -103,8 +103,8 @@ class NfcManager extends ReactContextBaseJavaModule implements ActivityEventList
 		    if (writeNdefRequest != null) {
 		    	callback.invoke("You can only issue one request at a time");
 		    } else {
-				boolean format = false;//options.getBoolean("format");
-				boolean formatReadOnly=false;// = options.getBoolean("formatReadOnly");
+				boolean format =options.getBoolean("format");
+				boolean formatReadOnly= options.getBoolean("formatReadOnly");
 				
 		        try {
 					NdefMessage msgToWrite;
