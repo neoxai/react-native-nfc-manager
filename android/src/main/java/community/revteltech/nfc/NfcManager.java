@@ -160,8 +160,8 @@ class NfcManager extends ReactContextBaseJavaModule implements ActivityEventList
 						msgToWrite = null;
 					} else {
 						byte[] bytes = rnArrayToBytes(rnArray);
-						NdefRecord recordToWrite=NdefRecord.createMime(mimeType,bytes);
-						msgToWrite = new NdefMessage(recordToWrite);
+						//NdefRecord recordToWrite=NdefRecord.createMime(mimeType,bytes);
+						msgToWrite = new NdefMessage(bytes);
 					}
 
 		    		writeNdefRequest = new WriteNdefRequest(
