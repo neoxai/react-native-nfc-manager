@@ -28,6 +28,7 @@ import android.nfc.Tag;
 import android.nfc.TagLostException;
 import android.nfc.tech.Ndef;
 import android.nfc.tech.NdefFormatable;
+import android.nfc.tech.MifareUltralight;
 import android.os.Parcelable;
 
 import org.json.JSONObject;
@@ -105,6 +106,7 @@ class NfcManager extends ReactContextBaseJavaModule implements ActivityEventList
 		    } else {
 				boolean format =options.getBoolean("format");
 				boolean formatReadOnly= options.getBoolean("formatReadOnly");
+
 				
 		        try {
 					NdefMessage msgToWrite;
@@ -133,6 +135,47 @@ class NfcManager extends ReactContextBaseJavaModule implements ActivityEventList
 		}
 	}
 
+	@ReactMethod
+	public void requestNtagWrite(ReadableArray rnArray, ReadableMap options, Callback callback) {
+		synchronized(this) {
+			if (!isForegroundEnabled) {
+				callback.invoke("you should requestTagEvent first-neoxaiedit2");
+				return;
+			}
+
+		    if (writeNdefRequest != null) {
+		    	callback.invoke("You can only issue one request at a time");
+		    } else {
+				boolean format =options.getBoolean("format");
+				boolean formatReadOnly= options.getBoolean("formatReadOnly");
+				
+				
+		        try {
+					NdefMessage msgToWrite;
+
+					/// the only case we allow ndef message to be null is when formatting, see:
+					/// https://developer.android.com/reference/android/nfc/tech/NdefFormatable.html#format(android.nfc.NdefMessage)
+					///	this API allows the `firstMessage` to be null
+					if (format && rnArray == null) {
+						msgToWrite = null;
+					} else {
+						byte[] bytes = rnArrayToBytes(rnArray);
+						NdefRecord recordToWrite=NdefRecord.createMime(mimeType,bytes);
+						msgToWrite = new NdefMessage(recordToWrite);
+					}
+
+		    		writeNdefRequest = new WriteNdefRequest(
+						msgToWrite,
+						callback, // defer the callback 
+						format,
+						formatReadOnly
+					); 
+		        } catch (IllegalArgumentException e) {
+		        	callback.invoke("Incorrect ndef format");
+		        }
+		    }
+		}
+	}
 	@ReactMethod
 	public void start(Callback callback) {
 		NfcAdapter nfcAdapter = NfcAdapter.getDefaultAdapter(context);
@@ -384,6 +427,9 @@ class NfcManager extends ReactContextBaseJavaModule implements ActivityEventList
 		} else if (action.equals(NfcAdapter.ACTION_TAG_DISCOVERED)) {
 			parsed = tag2React(tag);
 		}
+		else{
+			parsed=errorMap(action);
+		}
 
 		return parsed;
 	}
@@ -396,7 +442,14 @@ class NfcManager extends ReactContextBaseJavaModule implements ActivityEventList
 			return null;
 		}
 	}
-
+private WritableMap errorMap(String anystring) {
+		try {
+			JSONObject json = Util.stringToJSON(anystring);
+			return JsonConvert.jsonToReact(json);
+		} catch (JSONException ex) {
+			return null;
+		}
+	}
     private WritableMap ndef2React(Ndef ndef, Parcelable[] messages) {
 		try {
 			JSONObject json = buildNdefJSON(ndef, messages);

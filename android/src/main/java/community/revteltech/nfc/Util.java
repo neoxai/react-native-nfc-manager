@@ -136,7 +136,13 @@ public class Util {
 
         return new JSONArray(list);
     }
+    static JSONObject stringToJSON(String str) {
+        JSONObject json = new JSONObject();
 
+        json.put("string", str);
+               
+        return json;
+    }
     static JSONObject recordToJSON(NdefRecord record) {
         JSONObject json = new JSONObject();
         try {
